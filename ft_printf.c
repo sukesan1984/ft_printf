@@ -130,6 +130,21 @@ int		ft_get_digits(int d)
 	return (digits);
 }
 
+int		ft_get_digits_x(unsigned int ud)
+{
+	int digits;
+
+	digits = 0;
+
+	while (ud / 16)
+	{
+		digits++;
+		ud /= 16;
+	}
+	digits++;
+	return (digits);
+}
+
 void	initialize_args(t_args *args)
 {
 	args->c = 0;
@@ -246,6 +261,22 @@ int	ft_puti(int d, int padding)
 	return (res);
 }
 
+int	ft_putx(unsigned int ud, int padding)
+{
+	int	res;
+
+	res = 0;
+	while (padding-- > 0)
+		res += ft_putchar('0');
+	if (ud / 16)
+		res += ft_putx(ud / 16, padding);
+	if ((ud % 16) >= 10)
+		res += ft_putchar((ud % 16) - 10 + 'a');
+	else
+		res += ft_putchar((ud % 16) + '0');
+	return (res);
+}
+
 int	ft_put_d(t_args *args, va_list ap)
 {
 	int	width;
@@ -278,12 +309,43 @@ int	ft_put_d(t_args *args, va_list ap)
 	return (res + ft_puti(d, padding));
 }
 
+int ft_put_x(t_args *args, va_list ap)
+{
+	int	width;
+	int	precision;
+	int	d;
+	int	len;
+	int	putlen;
+	int	padding;
+	int	res;
+
+	width = args->has_width ? args->width : 0;
+	precision = args->has_precision ? args->precision : 0;
+	d = va_arg(ap, int);
+	len = ft_get_digits_x(d);
+	if (args->has_precision && args->precision == 0 && d == 0)
+		len = 0;
+	padding = (len < precision) ? precision - len : 0;
+	putlen = len + padding;
+	res = 0;
+	while ((width - putlen) > 0)
+	{
+		res += ft_putchar(' ');
+		width--;
+	}
+	if (args->has_precision && args->precision == 0 && d == 0)
+		return (res);
+	return (res + ft_putx(d, padding));
+}
+
 int	ft_put_conv(t_args *args, va_list ap)
 {
 	if (args->c == 's')
 		return ft_put_s(args, ap);
 	else if (args->c == 'd')
 		return ft_put_d(args, ap);
+	else if (args->c == 'x')
+		return ft_put_x(args, ap);
 	return (0);
 }
 
@@ -379,6 +441,71 @@ int main()
 	F("[%.0d]\n", 0);
 	F("[%10.0d]\n", 10);
 	F("[%.0d]\n", -120);
+	F("[%x]\n", 123);
+	F("[%x]\n", -123);
+	F("[%x]\n", -2147483648);
+	F("[%x]\n", 2147483647);
+	F("[%.0x]\n", -2147483648);
+	F("[%.5x]\n", -2147483648);
+	F("[%.10x]\n", -2147483648);
+	F("[%.20x]\n", -2147483648);
+	F("[%.x]\n", -2147483648);
+	F("[%10.x]\n", -2147483648);
+	F("[%20.x]\n", -2147483648);
+	F("[%0.0x]\n", -2147483648);
+	F("[%5.0x]\n", -2147483648);
+	F("[%10.0x]\n", -2147483648);
+	F("[%20.0x]\n", -2147483648);
+	F("[%0.0x]\n", -2147483648);
+	F("[%0.5x]\n", -2147483648);
+	F("[%0.10x]\n", -2147483648);
+	F("[%0.20x]\n", -2147483648);
+	F("[%5.0x]\n", -2147483648);
+	F("[%5.5x]\n", -2147483648);
+	F("[%5.10x]\n", -2147483648);
+	F("[%5.20x]\n", -2147483648);
+	F("[%10.0x]\n", -2147483648);
+	F("[%10.5x]\n", -2147483648);
+	F("[%10.10x]\n", -2147483648);
+	F("[%10.20x]\n", -2147483648);
+	F("[%20.0x]\n", -2147483648);
+	F("[%20.5x]\n", -2147483648);
+	F("[%20.10x]\n", -2147483648);
+	F("[%20.20x]\n", -2147483648);
+	F("[%.0x]\n", -1234);
+	F("[%.5x]\n", -1234);
+	F("[%.10x]\n", -1234);
+	F("[%.20x]\n", -1234);
+	F("[%.x]\n", -1234);
+	F("[%10.x]\n", -1234);
+	F("[%20.x]\n", -1234);
+	F("[%0.0x]\n", -1234);
+	F("[%5.0x]\n", -1234);
+	F("[%10.0x]\n", -1234);
+	F("[%20.0x]\n", -1234);
+	F("[%0.0x]\n", -1234);
+	F("[%0.5x]\n", -1234);
+	F("[%0.10x]\n", -1234);
+	F("[%0.20x]\n", -1234);
+	F("[%5.0x]\n", -1234);
+	F("[%5.5x]\n", -1234);
+	F("[%5.10x]\n", -1234);
+	F("[%5.20x]\n", -1234);
+	F("[%10.0x]\n", -1234);
+	F("[%10.5x]\n", -1234);
+	F("[%10.10x]\n", -1234);
+	F("[%10.20x]\n", -1234);
+	F("[%20.0x]\n", -1234);
+	F("[%20.5x]\n", -1234);
+	F("[%20.10x]\n", -1234);
+	F("[%20.20x]\n", -1234);
+	F("[%10x]\n", 0);
+	F("[%10.x]\n", 0);
+	F("[%10.0x]\n", 0);
+	F("[%.0x]\n", 0);
+	F("[%10.0x]\n", 10);
+	F("[%.0x]\n", -120);
+	F("%s, %10.s, %d, %x\n", "hoge", "fuga", 10, -123);
 	return (0);
 }
 #endif
