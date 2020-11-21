@@ -220,10 +220,70 @@ int	ft_put_s(t_args *args, va_list ap)
 	return (res + ft_putstrl(s, putlen));
 }
 
+int	ft_puti(int d, int padding)
+{
+	int	res;
+
+	res = 0;
+	if (d == -2147483648)
+	{
+		res += ft_putchar('-');
+		while (padding-- > 0)
+			res += ft_putchar('0');
+		res += ft_putstr("2147483648");
+		return (res);
+	}
+	if (d < 0)
+	{
+		res += ft_putchar('-');
+		d *= -1;
+	}
+	while (padding-- > 0)
+		res += ft_putchar('0');
+	if (d / 10)
+		res += ft_puti(d / 10, padding);
+	res += ft_putchar((d % 10) + '0');
+	return (res);
+}
+
+int	ft_put_d(t_args *args, va_list ap)
+{
+	int	width;
+	int	precision;
+	int	d;
+	int	len;
+	int	putlen;
+	int	padding;
+	int	res;
+
+	width = args->has_width ? args->width : 0;
+	precision = args->has_precision ? args->precision : 0;
+	d = va_arg(ap, int);
+	len = ft_get_digits(d);
+	if (args->has_precision && args->precision == 0 && d == 0)
+		len = 0;
+	if (d < 0)
+		padding = ((len - 1) < precision) ? precision - (len - 1) : 0;
+	else
+		padding = (len < precision) ? precision - len : 0;
+	putlen = len + padding;
+	res = 0;
+	while ((width - putlen) > 0)
+	{
+		res += ft_putchar(' ');
+		width--;
+	}
+	if (args->has_precision && args->precision == 0 && d == 0)
+		return (res);
+	return (res + ft_puti(d, padding));
+}
+
 int	ft_put_conv(t_args *args, va_list ap)
 {
 	if (args->c == 's')
 		return ft_put_s(args, ap);
+	else if (args->c == 'd')
+		return ft_put_d(args, ap);
 	return (0);
 }
 
@@ -282,6 +342,43 @@ int main()
 	F("[%3.2s]\n", NULL);
 	F("[%3.10s]\n", NULL);
 	F("[%10.0s]\n", NULL);
+	F("[%d]\n", 123);
+	F("[%d]\n", -123);
+	F("[%d]\n", -2147483648);
+	F("[%d]\n", 2147483647);
+	F("[%.0d]\n", -2147483648);
+	F("[%.5d]\n", -2147483648);
+	F("[%.10d]\n", -2147483648);
+	F("[%.20d]\n", -2147483648);
+	F("[%.d]\n", -2147483648);
+	F("[%10.d]\n", -2147483648);
+	F("[%20.d]\n", -2147483648);
+	F("[%0.0d]\n", -2147483648);
+	F("[%5.0d]\n", -2147483648);
+	F("[%10.0d]\n", -2147483648);
+	F("[%20.0d]\n", -2147483648);
+	F("[%0.0d]\n", -2147483648);
+	F("[%0.5d]\n", -2147483648);
+	F("[%0.10d]\n", -2147483648);
+	F("[%0.20d]\n", -2147483648);
+	F("[%5.0d]\n", -2147483648);
+	F("[%5.5d]\n", -2147483648);
+	F("[%5.10d]\n", -2147483648);
+	F("[%5.20d]\n", -2147483648);
+	F("[%10.0d]\n", -2147483648);
+	F("[%10.5d]\n", -2147483648);
+	F("[%10.10d]\n", -2147483648);
+	F("[%10.20d]\n", -2147483648);
+	F("[%20.0d]\n", -2147483648);
+	F("[%20.5d]\n", -2147483648);
+	F("[%20.10d]\n", -2147483648);
+	F("[%20.20d]\n", -2147483648);
+	F("[%10d]\n", 0);
+	F("[%10.d]\n", 0);
+	F("[%10.0d]\n", 0);
+	F("[%.0d]\n", 0);
+	F("[%10.0d]\n", 10);
+	F("[%.0d]\n", -120);
 	return (0);
 }
 #endif
